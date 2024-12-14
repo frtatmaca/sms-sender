@@ -1,0 +1,9 @@
+api:
+  appEnv: local
+  appId: sms-sender
+  name: sms-sender-api
+loglevel: info
+port: 8050
+cronExpression: "*/10 * * * *"
+redis:
+  addr: "localhost:6379"

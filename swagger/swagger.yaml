@@ -1,0 +1,86 @@
+definitions:
+  entity.Sms:
+    properties:
+      activeStatus:
+        type: boolean
+      content:
+        type: string
+      createdAt:
+        type: string
+      id:
+        example: 00000000-0000-0000-0000-000000000000
+        type: string
+      messageId:
+        type: string
+      to:
+        type: string
+    type: object
+  request.SmsRequestV1:
+    properties:
+      content:
+        type: string
+      to:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /api/v1/cronjob/start:
+    get:
+      description: Scheduler Start
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Scheduler Start
+      tags:
+      - Sms
+  /api/v1/cronjob/stop:
+    get:
+      description: Scheduler Stop
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Scheduler Stop
+      tags:
+      - Sms
+  /api/v1/notifications/sms:
+    get:
+      description: List Sms
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Sms'
+            type: array
+      summary: List Sms
+      tags:
+      - Sms
+    post:
+      consumes:
+      - application/json
+      description: send sms
+      parameters:
+      - description: SMS you want to create
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.SmsRequestV1'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: The newly created SMS
+          schema:
+            $ref: '#/definitions/entity.Sms'
+      summary: send sms
+      tags:
+      - SMS
+swagger: "2.0"
