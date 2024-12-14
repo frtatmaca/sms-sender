@@ -1,6 +1,7 @@
 # IDE files
 .vscode/
 .idea/
+.DS_Store
 
 # Binaries for programs and plugins
 *.exe
