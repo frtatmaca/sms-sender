@@ -5,6 +5,7 @@
 
 ## Usage
 
+The application contains different configuration files for different local, dev, tst, acc, prd environments. Environment information can be passed as an environmental variable with the APP_ENV parameter. If environment information is not given, the application runs in the local environment.
 ```shell,
 http://localhost:8050/swagger/index.html
 ```
