@@ -18,4 +18,7 @@ test: ## Run unit tests, alias: t
 
 install-tools: ## Install extra tools for development
 	go install github.com/swaggo/swag/cmd/swag@master
+	go install github.com/vektra/mockery/v2@v2.40.1
 
+generate-mocks: ## Generate mock files
+	go generate ./...
