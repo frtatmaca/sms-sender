@@ -28,7 +28,7 @@ func NewSmsHandler(smsService service.ISmsService) *SmsHandler {
 //	@Success		201		{object}	entity.Sms					"The newly created SMS"
 //	@Router			/api/v1/notifications/sms [post]
 func (h *SmsHandler) SendSmsV1(ctx *gin.Context) {
-	var req request.SmsRequestV1
+	var req *request.SmsRequestV1
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.Error(httperror.NewWithMetadata(httperror.InvalidRequest, err.Error()))
 		return
