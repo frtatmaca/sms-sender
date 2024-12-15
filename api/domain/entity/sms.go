@@ -23,3 +23,9 @@ func NewSms(to string, content string) Sms {
 		ActiveStatus: true,
 	}
 }
+
+func (s *Sms) DeActivate(messageId string) {
+	s.ActiveStatus = false
+	s.CreatedAt = time.Now()
+	s.MessageId = messageId
+}

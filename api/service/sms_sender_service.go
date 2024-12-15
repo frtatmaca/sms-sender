@@ -3,13 +3,11 @@ package service
 import (
 	"context"
 	"fmt"
-	"sync"
-	"time"
-
 	"github.com/frtatmaca/sms-sender/api/domain/entity"
 	"github.com/frtatmaca/sms-sender/api/storage"
 	sms_sender "github.com/frtatmaca/sms-sender/pkg/sms_sender/telefonica"
 	"go.uber.org/zap"
+	"sync"
 )
 
 var _ ISmsSenderService = new(SenderService)
@@ -64,9 +62,8 @@ func processChunk(ctx context.Context, chunk []entity.Sms, wg *sync.WaitGroup, s
 			logger.Errorw(fmt.Sprintf("Error while release lock %s", num.Id), zap.Any("error", err))
 		}
 
-		num.ActiveStatus = false
-		num.CreatedAt = time.Now()
-		num.MessageId = messageId
+		num.DeActivate(messageId)
+		
 		err = smsStorage.Update(ctx, &num)
 		if err != nil {
 			logger.Errorw(fmt.Sprintf("Error while record updateting %s", num.Id), zap.Any("error", err))

@@ -12,6 +12,11 @@ import (
 	"go.uber.org/zap"
 )
 
+const (
+	ACTIVE_SMS_KEY   = "activeStatus:true"
+	DEACTIVE_SMS_KEY = "activeStatus:false"
+)
+
 type IStorage interface {
 	List(ctx context.Context) ([]entity.Sms, error)
 	Get(ctx context.Context, Id string) (*entity.Sms, error)
@@ -36,7 +41,7 @@ func (storage *smsStorage) Create(ctx context.Context, sms entity.Sms) error {
 		panic(err)
 	}
 
-	if _, err := storage.client.HSet(ctx, "activeStatus:true", sms.Id.String(), data).Result(); err != nil {
+	if _, err := storage.client.HSet(ctx, ACTIVE_SMS_KEY, sms.Id.String(), data).Result(); err != nil {
 		storage.logger.Errorw(fmt.Sprintf("Error while sms create %s", sms.Id), zap.Any("error", err))
 		return err
 	}
@@ -44,7 +49,7 @@ func (storage *smsStorage) Create(ctx context.Context, sms entity.Sms) error {
 }
 
 func (storage *smsStorage) List(ctx context.Context) ([]entity.Sms, error) {
-	result, err := storage.client.HGetAll(ctx, "activeStatus:true").Result()
+	result, err := storage.client.HGetAll(ctx, ACTIVE_SMS_KEY).Result()
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +62,7 @@ func (storage *smsStorage) List(ctx context.Context) ([]entity.Sms, error) {
 
 		if msg.ActiveStatus == true {
 			lockKey := msg.Id.String() + ":lock"
-			ttl := 10 * time.Second // 5 saniyelik TTL
+			ttl := 10 * time.Second // 5 sn TTL
 
 			success, err := storage.client.SetNX(ctx, lockKey, "locked", ttl).Result()
 			if err != nil {
@@ -82,7 +87,7 @@ func (storage *smsStorage) List(ctx context.Context) ([]entity.Sms, error) {
 }
 
 func (storage *smsStorage) Get(ctx context.Context, Id string) (*entity.Sms, error) {
-	val, err := storage.client.HGet(ctx, "activeStatus:true", Id).Result()
+	val, err := storage.client.HGet(ctx, ACTIVE_SMS_KEY, Id).Result()
 	if err != nil || err == redis.Nil {
 		return nil, nil
 	}
@@ -96,12 +101,12 @@ func (storage *smsStorage) Get(ctx context.Context, Id string) (*entity.Sms, err
 func (storage *smsStorage) Update(ctx context.Context, sms *entity.Sms) error {
 	data, _ := json.Marshal(sms)
 
-	if _, err := storage.client.HSet(ctx, "activeStatus:false", sms.Id.String(), data).Result(); err != nil {
+	if _, err := storage.client.HSet(ctx, DEACTIVE_SMS_KEY, sms.Id.String(), data).Result(); err != nil {
 		storage.logger.Errorw(fmt.Sprintf("Error while add active status false %s", sms.Id), zap.Any("error", err))
 		return err
 	}
 
-	if _, err := storage.client.HDel(ctx, "activeStatus:true", sms.Id.String()).Result(); err != nil {
+	if _, err := storage.client.HDel(ctx, ACTIVE_SMS_KEY, sms.Id.String()).Result(); err != nil {
 		storage.logger.Errorw(fmt.Sprintf("Error while delete active status true %s", sms.Id), zap.Any("error", err))
 		return err
 	}
@@ -117,7 +122,7 @@ func (storage *smsStorage) ReleaseLock(ctx context.Context, sms *entity.Sms) err
 
 func (storage *smsStorage) GetAll(ctx context.Context) ([]entity.Sms, error) {
 	documents := make([]entity.Sms, 0)
-	keys := []string{"activeStatus:false"}
+	keys := []string{DEACTIVE_SMS_KEY}
 
 	for _, key := range keys {
 		result, err := storage.client.HGetAll(ctx, key).Result()
